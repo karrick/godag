@@ -1,7 +1,5 @@
 package godag
 
-import "fmt"
-
 // DAG represents a directed acyclic graph.
 type DAG struct {
 	nodes   map[string]*Node
@@ -31,6 +29,7 @@ func (d *DAG) Order() ([]string, error) {
 	}
 
 	ordered := make([]string, 0, len(ows))
+
 	i := 1
 	for {
 		list, ok := ows[i]
@@ -71,7 +70,7 @@ func (d *DAG) findWeight(node *Node) (int, error) {
 		if !ok {
 			n, ok := d.nodes[dep]
 			if !ok {
-				return 0, fmt.Errorf("cannot find node: %q", dep)
+				return 0, ErrMissingNode(dep)
 			}
 			w, err = d.findWeight(n)
 			if err != nil {
@@ -80,7 +79,7 @@ func (d *DAG) findWeight(node *Node) (int, error) {
 			d.weights[dep] = w
 		} else {
 			if w == -1 {
-				return 0, fmt.Errorf("cyclic loop detected: %q", dep)
+				return 0, ErrCyclicLoop(dep)
 			}
 		}
 		if w > max {
@@ -98,4 +97,16 @@ type Node struct {
 
 func (n Node) String() string {
 	return n.Label
+}
+
+type ErrMissingNode string
+
+func (e ErrMissingNode) Error() string {
+	return "cannot find node: " + string(e)
+}
+
+type ErrCyclicLoop string
+
+func (e ErrCyclicLoop) Error() string {
+	return "cyclic loop detected: " + string(e)
 }
