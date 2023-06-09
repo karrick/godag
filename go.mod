@@ -1,1 +1,3 @@
-module "github.com/karrick/godag"
+module github.com/karrick/godag
+
+go 1.20
